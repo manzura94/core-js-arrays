@@ -521,18 +521,16 @@ function findCommonElements(arr1, arr2) {
  *    findLongestIncreasingSubsequence([50, 3, 10, 7, 40, 80]) => 3
  */
 function findLongestIncreasingSubsequence(nums) {
-  const n = nums.length;
-  const dp = new Array(n).fill(1);
+  const lengths = nums.map((_, i, arr) =>
+    arr
+      .slice(0, i)
+      .reduce(
+        (max, el, j) => (el < arr[i] ? Math.max(max, lengths[j] + 1) : max),
+        1
+      )
+  );
 
-  for (let i = 1; i < n; i + 1) {
-    for (let j = 0; j < i; j + 1) {
-      if (nums[i] > nums[j] && dp[i] < dp[j] + 1) {
-        dp[i] = dp[j] + 1;
-      }
-    }
-  }
-
-  return Math.max(...dp);
+  return Math.max(0, ...lengths);
 }
 
 /**
@@ -550,14 +548,11 @@ function findLongestIncreasingSubsequence(nums) {
  *  propagateItemsByPositionIndex([ 1,2,3,4,5 ]) => [ 1, 2, 2, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 5 ]
  */
 function propagateItemsByPositionIndex(arr) {
-  const result = [];
-
-  arr.forEach((item, index) => {
-    const repeatedItems = new Array(index + 1).fill(item);
+  return arr.reduce((result, item, index) => {
+    const repeatedItems = Array(index + 1).fill(item);
     result.push(...repeatedItems);
-  });
-
-  return result;
+    return result;
+  }, []);
 }
 
 /**
@@ -574,20 +569,22 @@ function propagateItemsByPositionIndex(arr) {
  *    shiftArray([10, 20, 30, 40, 50], -3) => [40, 50, 10, 20, 30]
  */
 function shiftArray(arr, n) {
-  const shiftDirection = n >= 0 ? 'right' : 'left';
+  const { length } = arr;
+  const shift = n % length;
 
-  const absN = Math.abs(n);
-
-  const shiftedArray = arr.slice();
-  for (let i = 0; i < absN; i + 1) {
-    if (shiftDirection === 'right') {
-      shiftedArray.unshift(shiftedArray.pop());
-    } else {
-      shiftedArray.push(shiftedArray.shift());
-    }
+  if (length === 0) {
+    return [];
   }
 
-  return shiftedArray;
+  if (shift === 0) {
+    return [...arr];
+  }
+
+  if (shift > 0) {
+    return arr.slice(-shift).concat(arr.slice(0, length - shift));
+  }
+
+  return arr.slice(-shift, length).concat(arr.slice(0, -shift));
 }
 
 /**
